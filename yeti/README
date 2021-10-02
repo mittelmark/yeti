@@ -1,0 +1,61 @@
+#
+# ======================================================================
+#
+# YETI -- Yet another Tcl Interpreter
+#
+# A yacc/bison like parser for Tcl
+#
+# Copyright (c) Frank Pilhofer, yeti@fpx.de
+# 
+# ======================================================================
+#
+
+Yeti does the same job for Tcl that yacc or bison do for C. You can
+specify a grammar in a form similar to the Backus-Naur Form (BNF), and
+define scripts that are executed whenever a rule is matched. This text
+is not a tutorial for parsers, the reader is assumed to be reasonably
+familiar with the subject.
+
+After the rule set is complete, Yeti dumps code for a [incr Tcl] class
+that implements the parser. This parser uses a deterministic state
+machine computed from the rules. This has the advantage of using only
+linear runtime and memory for parsing, but the disadvantage that it is
+not possible to update the parser after parsing has started. It is
+common usage to generate a parser once at package installation time,
+and to store the parser in a file, from where it is then sourced.
+
+Parsers need a scanner to their job. The purpose of a scanner is to
+read tokens (terminals) from an input source. A scanner generator
+called ylex is included in the Yeti package; after adding rules, it
+also dumps code for a scanner class. Note that the popular tcLex
+scanner package cannot be used; it does not offer returning tokens
+to the caller, which Yeti parsers require, but only allows inline
+execution of code.
+
+See the manual pages of yeti and ylex for more information. The demo/
+subdirectory contains demos for both.
+
+Yeti is written in Tcl. It requires at least Tcl 8.0, [incr Tcl] 3.0,
+and struct module from the tcllib package. Generated parsers do not
+require the struct module, so they will work on systems where tcllib
+is not available.
+
+Yeti is released under BSD license without any warranties.
+
+Please send bug reports and feature requests to the author. Patches
+are welcome.
+
+So far, there is only the programmatic interface to ylex and yeti, you
+you need to write a Tcl program to generate your scanners and parsers.
+It probably makes sense to have a program that reads lex/yacc-style in-
+put files and then writes Tcl output files. This would make scanners
+and parsers even easier to write. And the program could use itself to
+parse the input files! Anybody wants to contribute such a tool?
+
+For those who didn't get the joke, the name of the package is a pun
+on both yacc and bison.
+
+----------------------------------------------------------------------
+
+Frank Pilhofer
+fp@fpx.de

@@ -1,0 +1,320 @@
+'\""
+'\" Copyright (c) 2001 Frank Pilhofer"
+'\""
+'\".so man.macros"
+.TH YETI n 0.4 yeti "Yet another Tcl Interpreter"
+.BS
+.SH NAME
+Yeti \- Yet another Tcl Interpreter
+.SH SYNOPSIS
+.PD 0
+\fBpackage require yeti ?0.4?\fR
+.PD
+.PP
+.PD 0
+\fByeti::yeti\fR \fIname\fR \fR?\fIoptions\fR?\fR
+.PP
+\fIname\fR \fBadd\fR \fIlhs\fR \fIrhs\fR \fR?\fIscript\fR?\fR
+.PP
+\fIname\fR \fBadd\fR \fIargs\fR
+.PP
+\fIname\fR \fBcode\fR \fItoken\fR \fIscript\fR
+.PP
+\fIname\fR \fBdump\fR
+.PP
+\fIname\fR \fBconfigure\fR \fB-name\fR \fR?\fIvalue\fR?\fR
+.PP
+\fIname\fR \fBconfigure\fR \fB-start\fR \fR?\fIvalue\fR?\fR
+.PP
+\fIname\fR \fBconfigure\fR \fB-verbose\fR \fR?\fIvalue\fR?\fR
+.PP
+\fIname\fR \fBconfigure\fR \fB-verbout\fR \fR?\fIvalue\fR?\fR
+.PD
+.BE
+.SH PARSER SYNOPSIS
+.PP
+.PD 0
+\fIparserName\fR \fIobjName\fR \fR?\fIoptions\fR?\fR
+.PP
+\fIobjName\fR \fBparse\fR
+.PP
+\fIobjName\fR \fBstep\fR
+.PP
+\fIobjName\fR \fBreset\fR
+.PP
+\fIobjName\fR \fBconfigure\fR \fB-scanner\fR \fR?\fIobject\fR?\fR
+.PP
+\fIobjName\fR \fBconfigure\fR \fB-verbose\fR \fR?\fIvalue\fR?\fR
+.PD
+.SH DESCRIPTION
+.PP
+This manual page describes \fByeti\fR, a parser generator that is
+modeled after the standard \fByacc\fR package (and its incarnation as
+GNU \fBbison\fR), which is used to create parsers in the C programming
+language.
+.PP
+Parsers are used to parse an input (a stream of terminals) according
+to a \fIgrammar\fR. This grammar is defined by a number of
+\fIrules\fR. \fByeti\fR supports a subclass of context-free grammars
+named LALR(1), which is the class of context-free grammars that can be
+parsed using a single lookahead token.
+.PP
+Rules in \fByeti\fR are written similar to the Backus-Naur Form
+(BNF). Rules have a \fInon-terminal\fR as left-hand side (LHS) and a
+list of non-terminals and \fIterminals\fR on the right-hand side
+(RHS). Non-terminals are parsed according to these rules, while
+terminals are read from the input. This way, all non-terminals are
+ultimately decomposed into sequences of terminals. There may be
+multiple rules with the same non-terminal on the LHS but different
+RHSs. The RHS may be empty.
+.PP
+\fByeti\fR does not do the parsing by itself, rather it is used, quite
+like \fByacc\fR, to generate parsers (by way of the \fBdump\fR
+method). Generated parsers are \fB[incr Tcl]\fR classes that act
+independently of \fByeti\fR, see the \fBParser\fR section below. These
+parsers can be customized; you can use the \fBcode\fR method to add
+user variables and methods to the class.
+.SH COMMANDS
+.TP
+\fByeti::yeti\fR \fIname\fR \fR?\fIoptions\fR?\fR
+Creates a new parser generator by the name of \fIname\fR. The new
+parser generator has an empty set of rules. \fIoptions\fR can be used
+to configure the parser generator's public variables, see the
+\fIvariables\fR section below.
+.SH METHODS
+.TP
+\fIname\fR \fBadd\fR \fIlhs\fR \fIrhs\fR \fR?\fIscript\fR?\fR
+.PD 0
+.TP
+\fIname\fR \fBadd\fR \fIargs\fR
+.PD
+Adds new rules to the parser. In the first form, \fIlhs\fR is a
+non-terminal, \fIrhs\fR is a (possibly empty) list of terminals and
+non-terminals. If this rule is matched, \fIscript\fR is executed. In
+the second form, \fIargs\fR is a list consisting of triplets, so the
+number of elements must be divisible by three. Each triplet represents
+a rule. The first element of each triplet is the \fIlhs\fR, the second
+element is the \fIrhs\fR, and the third element is a
+\fIscript\fR, as above. In the second and following triplets, \fB|\fR
+(vertical bar, pipe symbol) can be used as \fIlhs\fR, referring to the
+\fIlhs\fR of the previous rule. The minus sign \fB-\fR can be used for
+\fIcode\fR to indicate that no script is associated with this rule. If
+a rule is matched, its corresponding script is executed, see the
+\fBscripts\fR section below.
+.TP
+\fIname\fR \fBcode\fR \fItoken\fR \fIscript\fR
+Adds custom user code to the generated parser. \fItoken\fR must be one
+of
+.RS
+.IP \fBconstructor\fR
+Defines the class's constructor. The \fIscript\fR may have any of the
+formats allowed by \fB[incr Tcl]\fR, without the \fBconstructor\fR
+keyword.
+.IP \fBdestructor\fR
+Defines the body of the class's destructor.
+.IP \fBerror\fR
+Defines the body of the error handler that is called whenever an error
+occurs, e.g. parse errors or errors executing a rule's
+script. \fIscript\fR has access to the \fByyerrmsg\fR parameter, which
+contains a string with a description of the error and its
+cause. \fIscript\fR is supposed to inform the user of the problem. The
+default implementations prints the message to the channel set in the
+\fBverbout\fR variable. \fIscript\fR is expected to return normally;
+the parser then returns from the current invocation with the original
+error.
+.IP \fBreset\fR
+The \fIscript\fR is added to the body of the parser's \fIreset\fR
+method.
+.IP \fBpublic\fR
+.PD 0
+.IP \fBprotected\fR
+.IP \fBprivate\fR
+Defines public, protected or private class members. The \fIscript\fR
+may contain many different member definitions, like the respective
+keywords in an \fB[incr Tcl]\fR class definition.
+.PD
+.RE
+.TP
+\fIname\fR \fBdump\fR
+Returns a script containing the generated parser. This method is
+called after all configuration options have been set and all rules
+have been added; the parser generator object is usually deleted after
+this method has been called. The returned script can be passed to
+\fBeval\fR for instant usage, or saved to a file, from where it can
+later be sourced without involvement of the parser generator.
+.SH VARIABLES
+.TP
+\fIname\fR \fBconfigure\fR \fB-name\fR \fR?\fIvalue\fR?\fR
+Defines the class name of the generated parser class. The default
+value is \fBunnamed\fR.
+.TP
+\fIname\fR \fBconfigure\fR \fB-start\fR \fR?\fIvalue\fR?\fR
+Defines the starting non-terminal for the parser. There must be at
+least one rule with this starting non-terminal as the left hand
+side. The default value is \fBstart\fR.
+.TP
+\fIname\fR \fBconfigure\fR \fB-verbose\fR \fR?\fIvalue\fR?\fR
+If the value of the \fBverbose\fR variable is non-zero, the parser
+prints some debug information about the generated parser, like the
+state machines that are generated from the rule set.
+.TP
+\fIname\fR \fBconfigure\fR \fB-verbout\fR \fR?\fIvalue\fR?\fR
+Sets the target channel for debug information. The default value is
+\fBstderr\fR.
+.SH NOTES
+.PP
+No checks are done whether all non-terminals are reachable. Also, no
+checks are done to ensure that all non-terminals are defined, i.e.
+there is at least one rule with the non-terminal as LHS.
+.PP
+Using uppercase names for terminals and lowercase names for
+non-terminals is a common convention that is not enforced, and
+\fByeti\fR assumes all undefined tokens to be terminals.
+.PP
+Set the \fIverbose\fR variable to a positive value to see warnings
+about reduce/reduce conflicts. Shift/reduce conflicts are not
+reported; \fByeti\fR always prefers shifts over reductions.
+.SH PARSER USAGE
+.PP
+Parsers are independent of \fByeti\fR, their only dependency is on
+\fB[incr Tcl]\fR.
+.PP
+Parsers read terminals from a \fIscanner\fR and try to match them
+against the rule set. Starting from the \fBstart\fR non-terminal, the
+parser looks for a rule that accepts the terminal. Whenever a rule is
+matched, the script associated with the rule is executed. The values
+for each element on the RHS are made available to the script in the
+variables \fB$\fI<i>\fR, where \fI<i>\fR is the index of the item. The
+script can use these values to compute its own result.
+.PP
+Values for terminals are read from the \fIscanner\fR, values for
+non-terminals are the return values of the code associated with a rule
+that produced the non-terminal. If the code does not execute a
+\fBreturn\fR, or if there is no code associated with a rule, the
+value of the leftmost item on the RHS (\fB$1\fR) is used as result
+(see the example below).
+.PP
+Parsers are \fB[incr Tcl]\fR objects, so its usual rules of object
+handling (e.g. deletion of parsers) apply.
+.SH PARSER COMMANDS
+.TP
+\fIparserName\fR \fIobjName\fR \fR?\fIoptions\fR?\fR
+Creates a new parser instance by the name of \fIobjName\fR.
+\fIoptions\fR can be used to configure the parser's public variables,
+see the \fIparser variables\fR section below.
+.SH PARSER METHODS
+.TP
+\fIobjName\fR \fBparse\fR
+Runs the parser. Tokens are read from the scanner as necessary and
+matched against terminals. The parsing process runs to completion,
+i.e. until a rule for the \fBstart\fR token has been executed and the
+end of input has been reached. The value returned from the last rule
+is returned as result of \fBparse\fR, but it is also very common for
+parsers to leave data in variables rather than returning a result.
+.TP
+\fIobjName\fR \fBstep\fR
+Single-steps the parser. One step is either the shifting of a token or
+a reduction. This method may be useful e.g. to do other work in
+parallel to the parsing. The method returns a list of length two; the
+first element is the token just shifted or reduced, and the second
+element is the associated data. Parsing is finished if the token
+\fB__init__\fR has been reduced.
+.TP
+\fIobjName\fR \fBreset\fR
+Resets the parser to the initial state, e.g. to start parsing new
+input. The scanner must be reset or replaced separately.
+.SH PARSER VARIABLES
+.TP
+\fIobjName\fR \fBconfigure\fR \fB-scanner\fR \fR?\fIobject\fR?\fR
+The \fBscanner\fR variable holds the scanner from which terminals are
+read. The scanner must be configured before parsing can begin. By
+default, the scanner is not deleted; if desired, this can be done in
+custom destructor code (see the parser generator's \fBcode\fR method).
+.RS
+.PP
+\fIobject\fR must be a command; the parser calls this command
+with \fBnext\fR as parameter whenever a new terminal needs to be
+read. The value returned by the command is expected to be a list of
+length one or two. The first item of this list is considered to be a
+terminal, and the second item is considered to be the value associated
+with this terminal. If the list has only one element, the value is
+assumed to be the empty string. At the end of input, an empty string
+shall be returned as terminal.
+.PP
+The \fBylex\fR package is designed to provide appropriate scanners for
+parsing, but it is possible to use custom scanners as long as the
+above rules are satisfied.
+.RE
+.TP
+\fIobjName\fR \fBconfigure\fR \fB-verbose\fR \fR?\fIvalue\fR?\fR
+If the value of the \fBverbose\fR variable is non-zero, the parser
+prints debug information about the read tokens and matched rules to
+standard output.
+.TP
+\fIobjName\fR \fBconfigure\fR \fB-verbout\fR \fR?\fIvalue\fR?\fR
+Sets the target channel for debug information. The default value is
+\fBstderr\fR.
+.SH SCRIPTS
+.PP
+If a rule is matched, its corresponding script is executed in the
+context of the parser. Scripts have access to the variables
+\fB$\fI<i>\fR, which are set to the values associated with each
+item on the RHS, where \fI<i>\fR is the index of the item. Numbering
+items is left to right, starting with 1.
+.PP
+Scripts can execute \fBreturn\fR to set their return value, which will
+then be associated with the rule's LHS. If a script does not execute
+\fBreturn\fR, the value associated with the the leftmost item on the
+RHS is used as the rule's value. If the RHS is empty, an empty string
+is used.
+.PP
+\fByeti\fR reserves names with the \fByy\fR prefix, so scripts should
+not use or access variables with this prefix. Also, a parser's public
+methods and variables as seen above must be respected.
+.SH EXAMPLE
+.PP
+Here's one simple but complete example of a parser that can parse
+mathematical expressions, albeit limited to multiplications. The
+scanner is not shown, but is expected to return the terminals written
+in uppercase.
+.PP
+.PD 0
+set pgen [yeti::yeti #auto -name MathParser]
+.PP
+$pgen add start {mult} {
+.RS
+.PP
+puts "Result is $1"
+.RE
+.PP
+}
+.PP
+$pgen add mult {number MULTIPLY number} {
+.RS
+.PP
+return [expr $1 * $3]
+.RE
+.PP
+}
+.PP
+$pgen add mult {number}
+.PP
+$pgen add number {INTEGER}
+.PP
+$pgen add number {OPEN mult CLOSE} {
+.RS
+.PP
+return $2
+.RE
+.PP
+}
+.PP
+eval [$pgen dump]
+.PP
+set mp [MathParser #auto -scanner $scanner]
+.PP
+puts "The result is [$mp parse]"
+.PD
+.PP
+.SH KEYWORDS
+parser, scanner
