@@ -6,8 +6,9 @@ exec tclsh8.3 "$0" ${1+"$@"}
 # simple scanner that counts lines, words and characters: wc equivalent
 #
 
-lappend auto_path [file join [file dirname [info script]] ..]
+lappend auto_path [file join [file dirname [info script]] .. ..]
 package require ylex
+
 
 #
 # initialize scanner generator
@@ -110,4 +111,8 @@ if {[llength $argv] > 1} {
 }
 
 rename $scanner ""
+
+#puts "tcl++ [package present tcl++]"
+#puts "itcl [package present Itcl]"
+
 

@@ -114,5 +114,6 @@ foreach arg $argv {
     puts "Result is [$mp parse]"
 }
 
-delete object $mp
+rename $mp ""
+
 

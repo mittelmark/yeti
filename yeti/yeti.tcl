@@ -15,12 +15,13 @@
 
 package require Tcl 8.0
 package require struct 2.0
-
+#package require tcl++
+#namespace import -force ::itcl::*
 #
 # Can work with Itcl 3.0 or Tcl++ 2.3. We prefer the former, but don't
 # complain if the latter is already available.
 #
-if {true} {
+if {false} {
     if {[catch {package present tcl++ 2.3}]} {
         if {[catch {package require Itcl 3.0}]} {
             if {[catch {package require tcl++ 2.3}]} {
@@ -33,7 +34,7 @@ if {true} {
 }
  
 package provide yeti 0.5.0
-#package require Itcl
+package require Itcl
 
 #
 # ----------------------------------------------------------------------
@@ -43,7 +44,7 @@ package provide yeti 0.5.0
 
 namespace eval yeti {
 
-    ::itcl::class yeti {
+    itcl::class yeti {
 	public variable verbose
 	public variable verbout
 
