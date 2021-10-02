@@ -6,7 +6,7 @@ exec tclsh8.3 "$0" ${1+"$@"}
 # calculator that supports basic arithmetic and brackets
 #
 
-lappend auto_path [file join [file dirname [info script]] ..]
+lappend auto_path [file join [file dirname [info script]] .. ..]
 package require ylex
 package require yeti
 
@@ -34,7 +34,7 @@ set scannercode [$sg dump]
 # close $f
 
 eval $scannercode
-delete object $sg
+rename $sg ""
 
 #
 # Use yeti to generate a new parser
@@ -88,7 +88,7 @@ set parsercode [$pg dump]
 # close $f
 
 eval $parsercode
-delete object $pg
+rename $pg ""
 
 #
 # Instantiate a new parser

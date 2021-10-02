@@ -54,7 +54,7 @@ if {0} {
 }
 
 eval $scannertext
-delete object $scannergenerator
+rename $scannergenerator ""
 
 #
 # Create instance of scanner
@@ -109,5 +109,5 @@ if {[llength $argv] > 1} {
     puts [format "%7d %7d %7d %s" $totlines $totwords $totchars total]
 }
 
-delete object $scanner
+rename $scanner ""
 

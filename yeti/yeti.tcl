@@ -20,7 +20,7 @@ package require struct 2.0
 # Can work with Itcl 3.0 or Tcl++ 2.3. We prefer the former, but don't
 # complain if the latter is already available.
 #
-if {false} {
+if {true} {
     if {[catch {package present tcl++ 2.3}]} {
         if {[catch {package require Itcl 3.0}]} {
             if {[catch {package require tcl++ 2.3}]} {
@@ -33,7 +33,7 @@ if {false} {
 }
  
 package provide yeti 0.5.0
-package require Itcl
+#package require Itcl
 
 #
 # ----------------------------------------------------------------------
