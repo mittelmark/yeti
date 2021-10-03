@@ -14,27 +14,23 @@
 #
 
 package require Tcl 8.0
-package require struct 2.0
-#package require tcl++
-#namespace import -force ::itcl::*
+package require struct::graph 
 #
-# Can work with Itcl 3.0 or Tcl++ 2.3. We prefer the former, but don't
+# Can work with Itcl 3+ or Tcl++ 2.3. We prefer the former, but don't
 # complain if the latter is already available.
 #
-if {false} {
-    if {[catch {package present tcl++ 2.3}]} {
-        if {[catch {package require Itcl 3.0}]} {
-            if {[catch {package require tcl++ 2.3}]} {
-                error "Oops in YETI initialization: neither \[incr Tcl\] nor tcl++ available"
-            }
-        } else {
-            namespace import -force ::itcl::*
-        }
+if {[catch {package require Itcl}]} {
+    if {[file exists [file join [file dirname [info script]] .. tcl++]]} {
+        lappend auto_path [file join [file dirname [info script]] ..]
+    } elseif {[file exists [file join [file dirname [info script]] tcl++]]} {
+        lappend auto_path [file dirname [info script]]
     }
-}
+    package require tcl++
+    interp alias {} itcl::class {} tcl++::class
+} 
  
 package provide yeti 0.5.0
-package require Itcl
+#package require Itcl
 
 #
 # ----------------------------------------------------------------------
@@ -942,7 +938,20 @@ namespace eval yeti {
 	    #
 	    # Create parser code
 	    #
-            append data "package require Itcl\n"
+            #append data "package require Itcl\n"
+            # fallback tcl++ possible
+            append data {
+if {[catch {package require Itcl}]} {
+    if {[file exists [file join [file dirname [info script]] .. tcl++]]} {
+        lappend auto_path [file join [file dirname [info script]] ..]
+    } elseif {[file exists [file join [file dirname [info script]] tcl++]]} {
+        lappend auto_path [file dirname [info script]]
+    }
+    package require tcl++
+    interp alias {} itcl::class {} tcl++::class
+}
+} 
+            
 	    append data "itcl::class $name {\n"
 	    append data "    public variable scanner \"\"\n"
 	    append data "    public variable verbose 0\n"
