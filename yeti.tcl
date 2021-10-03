@@ -26,7 +26,17 @@ if {[catch {package require Itcl}]} {
         lappend auto_path [file dirname [info script]]
     }
     package require tcl++
-    interp alias {} itcl::class {} tcl++::class
+    #
+    # Fake presence of Itcl
+    #
+    
+    namespace eval ::itcl {
+        namespace import -force ::tcl++::class
+        namespace import -force ::tcl++::delete
+    }
+    
+    package provide Itcl 3.0
+    #interp alias {} itcl::class {} tcl++::class
 } 
  
 package provide yeti 0.5.0

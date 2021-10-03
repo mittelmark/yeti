@@ -48,13 +48,14 @@ $scannergenerator add {.} {
 
 set scannertext [$scannergenerator dump]
 
-if {0} {
-    set f [open "foo.tcl" w]
+if {1} {
+    set f [open "scan-wc-app.tcl" w]
     puts $f $scannertext
     close $f
 }
 
 eval $scannertext
+
 rename $scannergenerator ""
 
 #
@@ -109,6 +110,7 @@ foreach filename $argv {
 if {[llength $argv] > 1} {
     puts [format "%7d %7d %7d %s" $totlines $totwords $totchars total]
 }
+
 
 rename $scanner ""
 
