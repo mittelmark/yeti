@@ -1,24 +1,28 @@
-# graph.tcl --
+#----------------------------------------------------------------------
 #
-#	Implementation of a graph data structure for Tcl.
+# sets.tcl --
 #
-# Copyright (c) 2000-2005 by Andreas Kupries
+#	Definitions for the processing of sets.
+#
+# Copyright (c) 2004-2008 by Andreas Kupries.
 #
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: graph.tcl,v 1.33 2009/09/24 16:23:47 andreas_kupries Exp $
+# RCS: @(#) $Id: sets.tcl,v 1.17 2008/03/09 04:24:37 andreas_kupries Exp $
+#
+#----------------------------------------------------------------------
 
-# @mdgen EXCLUDE: graph_c.tcl
+# @mdgen EXCLUDE: sets_c.tcl
 
-package require Tcl 8.4
+package require Tcl 8.2
 
-namespace eval ::struct::graph {}
+namespace eval ::struct::set {}
 
 # ### ### ### ######### ######### #########
-## Management of graph implementations.
+## Management of set implementations.
 
-# ::struct::graph::LoadAccelerator --
+# ::struct::set::LoadAccelerator --
 #
 #	Loads a named implementation, if possible.
 #
@@ -29,19 +33,19 @@ namespace eval ::struct::graph {}
 #	A boolean flag. True if the implementation
 #	was successfully loaded; and False otherwise.
 
-proc ::struct::graph::LoadAccelerator {key} {
+proc ::struct::set::LoadAccelerator {key} {
     variable accel
     set r 0
     switch -exact -- $key {
 	critcl {
-	    # Critcl implementation of graph requires Tcl 8.4.
+	    # Critcl implementation of set requires Tcl 8.4.
 	    if {![package vsatisfies [package provide Tcl] 8.4]} {return 0}
 	    if {[catch {package require tcllibc}]} {return 0}
-	    set r [llength [info commands ::struct::graph_critcl]]
+	    set r [llength [info commands ::struct::set_critcl]]
 	}
 	tcl {
 	    variable selfdir
-	    source [file join $selfdir graph_tcl.tcl]
+	    source [file join $selfdir sets_tcl.tcl]
 	    set r 1
 	}
         default {
@@ -53,7 +57,7 @@ proc ::struct::graph::LoadAccelerator {key} {
     return $r
 }
 
-# ::struct::graph::SwitchTo --
+# ::struct::set::SwitchTo --
 #
 #	Activates a loaded named implementation.
 #
@@ -63,7 +67,7 @@ proc ::struct::graph::LoadAccelerator {key} {
 # Results:
 #	None.
 
-proc ::struct::graph::SwitchTo {key} {
+proc ::struct::set::SwitchTo {key} {
     variable accel
     variable loaded
 
@@ -83,13 +87,13 @@ proc ::struct::graph::SwitchTo {key} {
     # Deactivate the previous implementation, if there was any.
 
     if {![string equal $loaded ""]} {
-	rename ::struct::graph ::struct::graph_$loaded
+	rename ::struct::set ::struct::set_$loaded
     }
 
     # Activate the new implementation, if there is any.
 
     if {![string equal $key ""]} {
-	rename ::struct::graph_$key ::struct::graph
+	rename ::struct::set_$key ::struct::set
     }
 
     # Remember the active implementation, for deactivation by future
@@ -99,7 +103,12 @@ proc ::struct::graph::SwitchTo {key} {
     return
 }
 
-# ::struct::graph::Implementations --
+proc ::struct::set::Loaded {} {
+    variable loaded
+    return  $loaded
+}
+
+# ::struct::set::Implementations --
 #
 #	Determines which implementations are
 #	present, i.e. loaded.
@@ -110,7 +119,7 @@ proc ::struct::graph::SwitchTo {key} {
 # Results:
 #	A list of implementation keys.
 
-proc ::struct::graph::Implementations {} {
+proc ::struct::set::Implementations {} {
     variable accel
     set res {}
     foreach n [array names accel] {
@@ -120,7 +129,7 @@ proc ::struct::graph::Implementations {} {
     return $res
 }
 
-# ::struct::graph::KnownImplementations --
+# ::struct::set::KnownImplementations --
 #
 #	Determines which implementations are known
 #	as possible implementations.
@@ -132,11 +141,11 @@ proc ::struct::graph::Implementations {} {
 #	A list of implementation keys. In the order
 #	of preference, most prefered first.
 
-proc ::struct::graph::KnownImplementations {} {
+proc ::struct::set::KnownImplementations {} {
     return {critcl tcl}
 }
 
-proc ::struct::graph::Names {} {
+proc ::struct::set::Names {} {
     return {
 	critcl {tcllibc based}
 	tcl    {pure Tcl}
@@ -146,7 +155,7 @@ proc ::struct::graph::Names {} {
 # ### ### ### ######### ######### #########
 ## Initialization: Data structures.
 
-namespace eval ::struct::graph {
+namespace eval ::struct::set {
     variable  selfdir [file dirname [info script]]
     variable  accel
     array set accel   {tcl 0 critcl 0}
@@ -158,7 +167,7 @@ namespace eval ::struct::graph {
 ## most prefered first. Loads only one of the
 ## possible implementations. And activates it.
 
-namespace eval ::struct::graph {
+namespace eval ::struct::set {
     variable e
     foreach e [KnownImplementations] {
 	if {[LoadAccelerator $e]} {
@@ -174,7 +183,7 @@ namespace eval ::struct::graph {
 
 namespace eval ::struct {
     # Export the constructor command.
-    namespace export graph
+    namespace export set
 }
 
-package provide struct::graph 2.4.1
+package provide struct::set 2.2.3
