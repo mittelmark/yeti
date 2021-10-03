@@ -1828,3 +1828,4 @@ proc tcl++::ensemble {name body} {
 }
 namespace import -force tcl++::ensemble
 catch {rename auto_import- auto_import}
+

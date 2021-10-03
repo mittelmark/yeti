@@ -331,6 +331,7 @@ namespace eval yeti {
 	    #
 	    # Create scanner code
 	    #
+            # TODO: tcl++ as fallback
             append data "package require Itcl\n"
 	    append data "itcl::class $name {\n"
 	    append data "    public variable case $case\n"
