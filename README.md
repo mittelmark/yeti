@@ -18,3 +18,9 @@ if {[catch {package require Itcl}]} {
 
 You just have to place the tcl++ folder directly below of your scanner/parser.
 The scanner should then run even when Itcl is not not available.
+
+## Manual pages
+
+* [yeti.html](https://htmlpreview.github.io/?https://github.com/mittelmark/yeti/blob/master/yeti.html)
+* [ylex.html](https://htmlpreview.github.io/?https://github.com/mittelmark/yeti/blob/master/ylex.html)
+* [PgnReader demo](https://htmlpreview.github.io/?https://github.com/mittelmark/yeti/blob/master/demo/PgnReader.html)
