@@ -6,6 +6,13 @@ more details. I added a few bugfixes, removed the tcl++ support and bumpbed
 the package version to 0.5 to distinguish it clearly from the Frank Pilhofer's
 version. The Copyright stays at it is, a BSD License.
 
+The tools _yeti_ and _ylex_ do not work, in contrast to their counterparts [taccle](https://github.com/devnull42/taccle)  and
+[fickle](https://github.com/devnull42/fickle), on straight text files as inputs but on procedure calls,
+and that it requires Itcl or tcl++ to be present. The advantgage of yeti and
+ylex is that they can create lexers and parsers on the fly without the need to
+have this text file processing. Furthermore, yeti and ylex read as input just strings and not file handles.
+
+
 2021-10-02 - The direct support for tcl++ will be added later if I upload tcl++ version 2.3
 and have checked if it still works with Tcl 8.6 and Tcl 8.7.
 
