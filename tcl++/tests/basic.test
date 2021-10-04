@@ -29,11 +29,17 @@
 # ======================================================================
 
 # Detlef Groth 2021 - adding few fixes for Tcl 8.6 and 8.7
-if {[string compare test [info procs test]] == 1} then {source defs}
+#if {[string compare test [info procs test]] == 1} then {source defs}
 
 # ----------------------------------------------------------------------
 #  Simple class definition
 # ----------------------------------------------------------------------
+package require tcltest
+namespace import tcltest::*
+lappend auto_path ../..
+package require tcl++
+
+
 test basic-1.1 {define a simple class} {
     class Counter {
         constructor {args} {
@@ -333,3 +339,5 @@ test basic-6.8 {common variables can be redefined} {
 } {scalar}
 #
 catch {delete class test_globals test_arrays}
+
+tcltest::cleanupTests
