@@ -28,6 +28,9 @@ The scanner should then run even when Itcl is not not available.
 
 * [yeti.html](https://htmlpreview.github.io/?https://github.com/mittelmark/yeti/blob/master/yeti.html)
 * [ylex.html](https://htmlpreview.github.io/?https://github.com/mittelmark/yeti/blob/master/ylex.html)
+
+## Demos
+
 * [PgnReader demo](https://github.com/mittelmark/yeti/blob/main/demo/PgnReader.tcl)
 * [PgnReader output](https://github.com/mittelmark/yeti/blob/main/demo/PgnReader-0.1.tm)
 * [PgnReader HTML manual](https://htmlpreview.github.io/?https://github.com/mittelmark/yeti/blob/master/demo/PgnReader.html)
