@@ -1,0 +1,148 @@
+# Commands covered:  ensemble
+#
+# This file contains a collection of tests for one or more of the
+# commands added for [incr Tcl].  Sourcing this file into Tcl runs
+# the tests and generates output for errors.  No output means no errors
+# were found.
+#
+# Copyright (c) 1991-1993 The Regents of the University of California.
+# Copyright (c) 1994 Sun Microsystems, Inc.
+# Copyright (c) 1996 Lucent Technologies
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# $Id: ensemble.test,v 1.2 1998/09/04 19:10:52 matt Exp $
+
+package require tcltest
+namespace import tcltest::*
+lappend auto_path ../..
+package require tcl++
+
+namespace eval ::itcl {
+     namespace import -force ::tcl++::class
+     namespace import -force ::tcl++::delete
+}
+
+package provide Itcl 3.0
+
+#if {[string compare test [info procs test]] == 1} then {source defs}
+
+test ensemble-1.1 {creating a new ensemble} {
+    ensemble test_numbers {
+        option one {x} {
+            return "one: $x"
+        }
+        option two {x y} {
+            return "two: $x $y"
+        }
+    }
+} ""
+test ensemble-1.2 {adding to an existing ensemble} {
+    ensemble test_numbers {
+        option three {x y z} {
+            return "three: $x $y $z"
+        }
+    }
+} ""
+
+test ensemble-1.3a {invoking ensemble options} {
+    test_numbers one 1
+} "one: 1"
+test ensemble-1.3b {invoking ensemble options} {
+    test_numbers two 2 3
+} "two: 2 3"
+test ensemble-1.3c {invoking ensemble options} {
+    test_numbers three 3 4 5
+} "three: 3 4 5"
+
+test ensemble-1.4 {invoking ensemble options} {
+    list [catch "test_numbers three x" msg] $msg
+} {1 {wrong # args: should be "::tcl++::ensemble::test_numbers::three x y z"}}
+
+test ensemble-1.5 {invoking ensemble options} {
+    list [catch "test_numbers foo x y" msg] $msg
+} {1 {bad option "foo": must be one of one, three, or two}}
+
+test ensemble-2.0 {defining subensembles} {
+    ensemble test_numbers {
+        ensemble hex {
+            option base {} {
+                return 16
+            }
+            option digits {args} {
+                foreach num $args {
+                    lappend result "0x$num"
+                }
+                return $result
+            }
+        }
+        ensemble octal {
+            option base {} {
+                return 8
+            }
+            option digits {args} {
+                foreach num $args {
+                    lappend result "0$num"
+                }
+                return $result
+            }
+        }
+    }
+    list [catch "test_numbers foo" msg] $msg
+} {1 {bad option "foo": must be one of hex, octal, one, three, or two}}
+
+test ensemble-2.1 {invoking sub-ensemble options} {
+    list [catch "test_numbers hex base" msg] $msg
+} {0 16}
+
+test ensemble-2.2 {invoking sub-ensemble options} {
+    list [catch "test_numbers hex digits 3 a f" msg] $msg
+} {0 {0x3 0xa 0xf}}
+
+test ensemble-2.3 {invoking sub-ensemble options} {
+    list [catch "test_numbers octal base" msg] $msg
+} {0 8}
+
+test ensemble-2.4 {invoking sub-ensemble options} {
+    list [catch "test_numbers octal digits 3 5 10" msg] $msg
+} {0 {03 05 010}}
+
+
+test ensemble-3.0 {overriding ensemble options} {
+    ensemble test_numbers {
+        option three {} {
+            return "three: new version"
+        }
+    }
+    list [catch "test_numbers three" msg] $msg
+} {0 {three: new version}}
+
+test ensemble-3.1 {overriding sub-ensembles} {
+    ensemble test_numbers {
+        option octal {args} {
+            return "octal: $args"
+        }
+    }
+    list [catch "test_numbers octal base" msg] $msg
+} {0 {octal: base}}
+
+test ensemble-3.2 {overriding sub-ensembles} {
+    ensemble test_numbers {
+        ensemble octal {
+            option base {} {
+                return 8
+            }
+        }
+    }
+    list [catch "test_numbers octal base" msg] $msg
+} {0 8}
+
+test ensemble-3.3 {destroying ensembles} {
+    proc test_numbers {args} {
+        return "test_numbers: $args"
+    }
+    list [catch "test_numbers one 1 2" msg] $msg
+} {0 {test_numbers: one 1 2}}
+
+tcltest::cleanupTests
