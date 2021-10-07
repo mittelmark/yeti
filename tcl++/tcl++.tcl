@@ -48,6 +48,7 @@ proc uid {{pfx _tcl++_}} {
 namespace eval itcl {
 	variable library ${tcl++::library}
 	namespace import -force ::tcl++::class
+        namespace import -force ::tcl++::delete
 }
 #package provide Itcl 2.2
 
