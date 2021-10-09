@@ -1,0 +1,97 @@
+#
+# Tests for "local" command for creating objects local to a proc
+# ----------------------------------------------------------------------
+#   AUTHOR:  Michael J. McLennan
+#            Bell Labs Innovations for Lucent Technologies
+#            mmclennan@lucent.com
+#            http://www.tcltk.com/itcl
+#            Detlef Groth, Caputh-Schwielowsee (2022, updated for Tcl 8.6)
+#
+#      RCS:  $Id: local.test,v 1.2 1998/09/04 19:10:57 matt Exp $
+# ----------------------------------------------------------------------
+#               Copyright (c) 1993-1996  Lucent Technologies
+#'                            2021       Detlef Groth, Germany 
+# ======================================================================
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted,
+# provided that the above copyright notice appear in all copies and that
+# both that the copyright notice and warranty disclaimer appear in
+# supporting documentation, and that the names of Lucent Technologies
+# any of their entities not be used in advertising or publicity
+# pertaining to distribution of the software without specific, written
+# prior permission.
+#
+# Lucent Technologies disclaims all warranties with regard to this
+# software, including all implied warranties of merchantability and
+# fitness.  In no event shall Lucent be liable for any special, indirect
+# or consequential damages or any damages whatsoever resulting from loss
+# of use, data or profits, whether in an action of contract, negligence
+# or other tortuous action, arising out of or in connection with the use
+# or performance of this software.
+# ======================================================================
+
+package require tcltest
+namespace import tcltest::*
+lappend auto_path ../..
+package require tcl++
+
+namespace eval itcl {
+     namespace import -force ::tcl++::class
+     namespace import -force ::tcl++::delete
+}
+package provide Itcl 3.0
+proc untest {args} { }
+
+# if {[string compare test [info procs test]] == 1} then {source defs}
+
+# ----------------------------------------------------------------------
+#  Test "local" to create objects that only exist within a proc
+# ----------------------------------------------------------------------
+test local-1.1 {define a class to use for testing} {
+    class test_local {
+        common status ""
+        constructor {} {
+            lappend status "created $this"
+        }
+        destructor {
+            lappend status "deleted $this"
+        }
+        proc clear {} {
+            set status ""
+        }
+        proc check {} {
+            return $status
+        }
+        proc test {} {
+            local test_local #auto
+            lappend status "processing"
+        }
+        proc test2 {} {
+            local test_local #auto
+            lappend status "call test..."
+            test
+            lappend status "...back"
+        }
+    }
+    test_local #auto
+} {test_local0}
+
+test local-1.2 {} {
+    test_local::clear
+    test_local::test
+    test_local::check
+} {{created ::test_local::test_local1} processing {deleted ::test_local::test_local1}}
+
+test local-1.3 {} {
+    test_local::clear
+    test_local::test2
+    test_local::check
+} {{created ::test_local::test_local2} {call test...} {created ::test_local::test_local3} processing {deleted ::test_local::test_local3} ...back {deleted ::test_local::test_local2}}
+
+untest local-1.4 {} {
+    info objects -isa test_local
+} {test_local0}
+
+catch {delete class test_local}
+
+tcltest::cleanupTests
