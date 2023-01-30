@@ -9,6 +9,21 @@ version. The Copyright stays at it is, a BSD License. Then the code was backport
 using a version from Steve Havelka which fixed an issue in yeti.tcl and who removed
 tcl++ support. So the version is now 0.4.2 - the same which is available in LUCK.
 
+The itcl++ compatible code generation was now removed but you can your self
+add the catch below your self on top if you need this.
+
+```tcl
+if {[catch {package require Itcl}]} {
+    if {[file exists [file join [file dirname [info script]] .. tcl++]]} {
+        lappend auto_path [file join [file dirname [info script]] ..]
+    } elseif {[file exists [file join [file dirname [info script]] tcl++]]} {
+        lappend auto_path [file dirname [info script]]
+    }
+    package require tcl++
+    interp alias {} itcl::class {} tcl++::class
+}
+```
+
 The tools _yeti_ and _ylex_ do not work, in contrast to their counterparts [taccle](https://github.com/devnull42/taccle)  and
 [fickle](https://github.com/devnull42/fickle), on straight text files as inputs but on procedure calls,
 and that it requires Itcl or tcl++ to be present. The advantgage of yeti and
