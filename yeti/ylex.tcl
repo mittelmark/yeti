@@ -5,43 +5,16 @@
 #
 # A (f)lex-like parser for Tcl
 #
-# Copyright 2004-2014 (c) Frank Pilhofer, yeti (at) fpx (dot) de
-# Copyright 2021      (c) Detlef Groth,   detlef(at) dgroth (dot) de
-# 
+# Copyright (c) Frank Pilhofer, yeti@fpx.de
+#
 # ======================================================================
 #
 # CVS Version Tag: $Id: ylex.tcl,v 1.8 2004/07/05 23:46:49 fp Exp $
 #
 
 package require Tcl 8.0
-#
-# Can work with Itcl 3+ or Tcl++ 2.3. We prefer the former, but don't
-# complain if the latter is already available.
-#
-
-if {[catch {package require Itcl}]} {
-    if {[file exists [file join [file dirname [info script]] .. tcl++]]} {
-        lappend auto_path [file join [file dirname [info script]] ..]
-    } elseif {[file exists [file join [file dirname [info script]] tcl++]]} {
-        lappend auto_path [file dirname [info script]]
-    }
-    package require tcl++
-    
-    #
-    # Fake presence of Itcl
-    #
-    
-    namespace eval ::itcl {
-        namespace import -force ::tcl++::class
-        namespace import -force ::tcl++::delete
-    }
-    
-    package provide Itcl 3.0 
-    #interp alias {} itcl::class {} tcl++::class
-} 
-
-package provide ylex 0.5.0
-#package require Itcl
+package require Itcl
+package provide ylex 0.4.2
 
 #
 # ----------------------------------------------------------------------
@@ -95,7 +68,7 @@ namespace eval yeti {
 	# Constructor
 	# ============================================================
 	#
-	
+
 	constructor {args} {
 	    set ruleno 0
 	    set case 1
@@ -111,7 +84,7 @@ namespace eval yeti {
 	# Macro handling
 	# ============================================================
 	#
-	
+
 	private method substitute_macros {regex} {
 	    #
 	    # try to find {name} in regex
@@ -149,7 +122,7 @@ namespace eval yeti {
 	public method macro {args} {
 	    #
 	    # There may be a single list of names and regexs
-	    # 
+	    #
 
 	    if {[llength $args] == 1} {
 		set args [lindex $args 0]
@@ -342,19 +315,6 @@ namespace eval yeti {
 	    #
 	    # Create scanner code
 	    #
-            # TODO: tcl++ as fallback
-            #append data "package require Itcl\n"
-            append data {
-if {[catch {package require Itcl}]} {
-    if {[file exists [file join [file dirname [info script]] .. tcl++]]} {
-        lappend auto_path [file join [file dirname [info script]] ..]
-    } elseif {[file exists [file join [file dirname [info script]] tcl++]]} {
-        lappend auto_path [file dirname [info script]]
-    }
-    package require tcl++
-    interp alias {} itcl::class {} tcl++::class
-}
-} 
 
 	    append data "itcl::class $name {\n"
 	    append data "    public variable case $case\n"
@@ -578,7 +538,7 @@ if {[catch {package require Itcl}]} {
                                 -indices -- $yyregexs($yyruleno) \
                                 $yydata yyfound]
                     }
-                    
+
                     if {!$yyres} {
                         set yyfound [list]
                     } else {

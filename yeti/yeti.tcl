@@ -5,42 +5,17 @@
 #
 # A yacc/bison like parser for Tcl
 #
-# Copyright 2004-2014 (c) Frank Pilhofer, yeti (at) fpx (dot) de
-# Copyright 2021      (c) Detlef Groth,   detlef(at) dgroth (dot) de
-# 
+# Copyright (c) Frank Pilhofer, yeti@fpx.de
+#
 # ======================================================================
 #
 # CVS Version Tag: $Id: yeti.tcl,v 1.28 2004/07/06 00:11:03 fp Exp $
 #
 
 package require Tcl 8.0
-package require struct::graph 
-#
-# Can work with Itcl 3+ or Tcl++ 2.3. We prefer the former, but don't
-# complain if the latter is already available.
-#
-if {[catch {package require Itcl}]} {
-    if {[file exists [file join [file dirname [info script]] .. tcl++]]} {
-        lappend auto_path [file join [file dirname [info script]] ..]
-    } elseif {[file exists [file join [file dirname [info script]] tcl++]]} {
-        lappend auto_path [file dirname [info script]]
-    }
-    package require tcl++
-    #
-    # Fake presence of Itcl
-    #
-    
-    namespace eval ::itcl {
-        namespace import -force ::tcl++::class
-        namespace import -force ::tcl++::delete
-    }
-    
-    package provide Itcl 3.0
-    #interp alias {} itcl::class {} tcl++::class
-} 
- 
-package provide yeti 0.5.0
-#package require Itcl
+package require struct 2.0
+package require Itcl
+package provide yeti 0.4.2
 
 #
 # ----------------------------------------------------------------------
@@ -49,8 +24,8 @@ package provide yeti 0.5.0
 #
 
 namespace eval yeti {
-
-    itcl::class yeti {
+    namespace import -force ::itcl::*
+    class yeti {
 	public variable verbose
 	public variable verbout
 
@@ -115,13 +90,14 @@ namespace eval yeti {
 	private variable userdestrcode
 	private variable usererrorcode
 	private variable userresetcode
+	private variable userreturndefaultcode {set yyretdata [append 1 {}]}
 
 	#
 	# ============================================================
 	# Constructor and Destructor
 	# ============================================================
 	#
-	
+
 	constructor {args} {
 	    set verbose 0
 	    set ruleno 1
@@ -198,6 +174,9 @@ namespace eval yeti {
 		}
 		reset {
 		    set userresetcode $thecode
+		}
+		returndefault {
+		    set userreturndefaultcode $thecode
 		}
 	    }
 	}
@@ -667,7 +646,7 @@ namespace eval yeti {
 	    # that represents all nodes that are reachable by epsilon
 	    # transitions from the NFSM's initial state.
 	    #
-	    
+
 	    BuildDFSMTransition 1 [NFSMEpsilonTransitions $nfsminitstate]
 
 	    #
@@ -802,7 +781,7 @@ namespace eval yeti {
 	    if {[llength [$sm node get $state info]] > 0} {
 		puts $verbout ""
 	    }
-	    
+
 	    foreach arc [$sm arcs -out $state] {
 		set token [$sm arc get $arc token]
 		if {$token == ""} {
@@ -842,7 +821,7 @@ namespace eval yeti {
 		set lhs [lindex $rules($redux) 0]
 		puts $verbout "  (default): reduce using rule# $redux ($lhs)"
 	    }
-	    
+
 	    if {[llength $reductions] > 0} {
 		puts $verbout ""
 	    }
@@ -940,7 +919,7 @@ namespace eval yeti {
 	    #
 	    # First, build DFSM if necessary
 	    #
-	    
+
 	    if {$dfsm == ""} {
 		BuildSMS
 	    }
@@ -948,20 +927,7 @@ namespace eval yeti {
 	    #
 	    # Create parser code
 	    #
-            #append data "package require Itcl\n"
-            # fallback tcl++ possible
-            append data {
-if {[catch {package require Itcl}]} {
-    if {[file exists [file join [file dirname [info script]] .. tcl++]]} {
-        lappend auto_path [file join [file dirname [info script]] ..]
-    } elseif {[file exists [file join [file dirname [info script]] tcl++]]} {
-        lappend auto_path [file dirname [info script]]
-    }
-    package require tcl++
-    interp alias {} itcl::class {} tcl++::class
-}
-} 
-            
+
 	    append data "itcl::class $name {\n"
 	    append data "    public variable scanner \"\"\n"
 	    append data "    public variable verbose 0\n"
@@ -976,7 +942,7 @@ if {[catch {package require Itcl}]} {
 	    append data "    private common yyredux\n"
 	    append data "    private common yyrules\n"
 	    append data "\n"
-	    
+
 	    #
 	    # yytrans: array($state,$token) -> newstate
 	    #
@@ -987,7 +953,7 @@ if {[catch {package require Itcl}]} {
 		foreach arc [$dfsm arcs -out $state] {
 		    set token [$dfsm arc get $arc token]
 		    set ts [$dfsm arc target $arc]
-		    append data "        $state,$token $ts\n"
+		    append data "        [list $state,$token] $ts\n"
 		}
 	    }
 
@@ -1034,7 +1000,7 @@ if {[catch {package require Itcl}]} {
 		set rhs [lindex $rule 1]
 		append data "        $ruleno {$lhs {$rhs}}\n"
 	    }
-	  
+
 	    append data "    }\n"
 	    append data "\n"
 
@@ -1151,30 +1117,27 @@ if {[catch {package require Itcl}]} {
 	    append data "            set \$yyvarname \$yyvarval\n"
 	    append data "        }\n"
 	    append data "        \n"
-	    if {[llength [array names codes]] > 0} {
-		append data "        set yyretcode \[catch {\n"
-		append data "            switch -- \$yyruleno {\n"
-		foreach ruleno [lsort -integer [array names codes]] {
-		    append data "                $ruleno {\n"
-		    append data $codes($ruleno) "\n"
-		    append data "                }\n"
-		}
-		append data "            }\n"
-		append data "        } yyretdata\]\n"
-	    } else {
-		#
-		# Tcl doesn't like empty switch statements
-		#
-		append data "        set yyretcode 0"
+	    append data "        set yyretcode \[catch {\n"
+	    append data "            switch -- \$yyruleno {\n"
+	    append data "                0 {\n"
+	    append data "                    return \$1\n"
+	    append data "                }\n"
+	    foreach ruleno [lsort -integer [array names codes]] {
+		append data "                $ruleno {\n"
+		append data $codes($ruleno) "\n"
+		append data "                }\n"
 	    }
-	    append data "        \n"
-	    append data "        if {\$yyretcode == 0} {\n"
-	    append data "            if {\$yycount} {\n"
-	    append data "                set yyretdata \$1\n"
-	    append data "            } else {\n"
-	    append data "                set yyretdata \"\"\n"
 	    append data "            }\n"
-	    append data "        } elseif {\$yyretcode == 1} {\n"
+	    append data "        } yyretdata\]\n"
+	    append data "        \n"
+	    if {$userreturndefaultcode ne {}} {
+		append data "        if {\$yyretcode == 0} {\n"
+		append data "            set yyretcode \[catch {\n"
+		append data $userreturndefaultcode\n
+		append data "            } yyretdata\]\n"
+		append data "        }\n"
+	    }
+	    append data "        if {\$yyretcode == 1} {\n"
 	    append data "            global errorInfo\n"
 	    append data "            set yyerrmsg \"script for rule # \$yyruleno (\$yylhs --> \$yyrhs) failed: \$yyretdata\"\n"
 	    append data "            yyerror \$yyerrmsg\n"
