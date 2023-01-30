@@ -1,10 +1,8 @@
-NAME
-====
+# NAME
 
 Yeti - Yet another Tcl Interpreter
 
-SYNOPSIS
-========
+# SYNOPSIS
 
 **package require yeti ?0.4?**
 
@@ -26,8 +24,7 @@ SYNOPSIS
 
 *name* **configure** **-verbout** ?*value*?
 
-PARSER SYNOPSIS
-===============
+# PARSER SYNOPSIS
 
 *parserName* *objName* ?*options*?
 
@@ -41,8 +38,7 @@ PARSER SYNOPSIS
 
 *objName* **configure** **-verbose** ?*value*?
 
-DESCRIPTION
-===========
+# DESCRIPTION
 
 This manual page describes **yeti**, a parser generator that is modeled
 after the standard **yacc** package (and its incarnation as GNU
@@ -71,8 +67,7 @@ Generated parsers are **\[incr Tcl\]** classes that act independently of
 customized; you can use the **code** method to add user variables and
 methods to the class.
 
-COMMANDS
-========
+# COMMANDS
 
 **yeti::yeti** *name* ?*options*?
 
@@ -81,8 +76,7 @@ COMMANDS
     configure the parser generator\'s public variables, see the
     *variables* section below.
 
-METHODS
-=======
+# METHODS
 
 *name* **add** *lhs* *rhs* ?*script*?
 
@@ -114,13 +108,19 @@ see the **scripts** section below.
 :   Adds custom user code to the generated parser. *token* must be one
     of
 
-    -   Defines the class\'s constructor. The *script* may have any of
+    constructor
+
+    :   Defines the class\'s constructor. The *script* may have any of
         the formats allowed by **\[incr Tcl\]**, without the
         **constructor** keyword.
 
-    -   Defines the body of the class\'s destructor.
+    destructor
 
-    -   Defines the body of the error handler that is called whenever an
+    :   Defines the body of the class\'s destructor.
+
+    error
+
+    :   Defines the body of the error handler that is called whenever an
         error occurs, e.g. parse errors or errors executing a rule\'s
         script. *script* has access to the **yyerrmsg** parameter, which
         contains a string with a description of the error and its cause.
@@ -130,14 +130,33 @@ see the **scripts** section below.
         normally; the parser then returns from the current invocation
         with the original error.
 
-    -   The *script* is added to the body of the parser\'s *reset*
+    reset
+
+    :   The *script* is added to the body of the parser\'s *reset*
         method.
 
-    -   
+    returndefault
 
-    -   
+    :   The *script* is executed by the parser whenever the code
+        associated with a non-terminal is omitted or does not execute a
+        return. The result or return value of *script* is used as the
+        value of the non-terminal. The default **returndefault** script
+        returns the leftmost item on the RHS (**\$1**). If *script* is
+        set to empty string, the result of the code associated with a
+        non-terminal is used as its value even if return was not
+        executed.
 
-    -   Defines public, protected or private class members. The *script*
+    public
+
+    :   
+
+    protected
+
+    :   
+
+    private
+
+    :   Defines public, protected or private class members. The *script*
         may contain many different member definitions, like the
         respective keywords in an **\[incr Tcl\]** class definition.
 
@@ -150,8 +169,7 @@ see the **scripts** section below.
     to **eval** for instant usage, or saved to a file, from where it can
     later be sourced without involvement of the parser generator.
 
-VARIABLES
-=========
+# VARIABLES
 
 *name* **configure** **-name** ?*value*?
 
@@ -175,8 +193,7 @@ VARIABLES
 :   Sets the target channel for debug information. The default value is
     **stderr**.
 
-NOTES
-=====
+# NOTES
 
 No checks are done whether all non-terminals are reachable. Also, no
 checks are done to ensure that all non-terminals are defined, i.e. there
@@ -190,8 +207,7 @@ Set the *verbose* variable to a positive value to see warnings about
 reduce/reduce conflicts. Shift/reduce conflicts are not reported;
 **yeti** always prefers shifts over reductions.
 
-PARSER USAGE
-============
+# PARSER USAGE
 
 Parsers are independent of **yeti**, their only dependency is on
 **\[incr Tcl\]**.
@@ -201,21 +217,22 @@ the rule set. Starting from the **start** non-terminal, the parser looks
 for a rule that accepts the terminal. Whenever a rule is matched, the
 script associated with the rule is executed. The values for each element
 on the RHS are made available to the script in the variables
-**\$***\<i\>*, where *\<i\>* is the index of the item. The script can
-use these values to compute its own result.
+**\$***\<i>*, where *\<i>* is the index of the item. The script can use
+these values to compute its own result.
 
 Values for terminals are read from the *scanner*, values for
 non-terminals are the return values of the code associated with a rule
 that produced the non-terminal. If the code does not execute a
-**return**, or if there is no code associated with a rule, the value of
-the leftmost item on the RHS (**\$1**) is used as result (see the
+**return**, or if there is no code associated with a rule, the
+**returndefault** script is executed to obtain the value of the
+non-terminal. If the user did not override **returndefault**, the value
+of the leftmost item on the RHS (**\$1**) is used as result (see the
 example below).
 
 Parsers are **\[incr Tcl\]** objects, so its usual rules of object
 handling (e.g. deletion of parsers) apply.
 
-PARSER COMMANDS
-===============
+# PARSER COMMANDS
 
 *parserName* *objName* ?*options*?
 
@@ -223,8 +240,7 @@ PARSER COMMANDS
     can be used to configure the parser\'s public variables, see the
     *parser variables* section below.
 
-PARSER METHODS
-==============
+# PARSER METHODS
 
 *objName* **parse**
 
@@ -249,8 +265,7 @@ PARSER METHODS
 :   Resets the parser to the initial state, e.g. to start parsing new
     input. The scanner must be reset or replaced separately.
 
-PARSER VARIABLES
-================
+# PARSER VARIABLES
 
 *objName* **configure** **-scanner** ?*object*?
 
@@ -284,13 +299,12 @@ PARSER VARIABLES
 :   Sets the target channel for debug information. The default value is
     **stderr**.
 
-SCRIPTS
-=======
+# SCRIPTS
 
 If a rule is matched, its corresponding script is executed in the
 context of the parser. Scripts have access to the variables
-**\$***\<i\>*, which are set to the values associated with each item on
-the RHS, where *\<i\>* is the index of the item. Numbering items is left
+**\$***\<i>*, which are set to the values associated with each item on
+the RHS, where *\<i>* is the index of the item. Numbering items is left
 to right, starting with 1.
 
 Scripts can execute **return** to set their return value, which will
@@ -303,15 +317,14 @@ used.
 use or access variables with this prefix. Also, a parser\'s public
 methods and variables as seen above must be respected.
 
-EXAMPLE
-=======
+# EXAMPLE
 
 Here\'s one simple but complete example of a parser that can parse
 mathematical expressions, albeit limited to multiplications. The scanner
 is not shown, but is expected to return the terminals written in
 uppercase.
 
-set pgen \[yeti::yeti \#auto -name MathParser\]
+set pgen \[yeti::yeti #auto -name MathParser\]
 
 \$pgen add start {mult} {
 
@@ -321,7 +334,7 @@ set pgen \[yeti::yeti \#auto -name MathParser\]
 
 \$pgen add mult {number MULTIPLY number} {
 
-> return \[expr \$1 \* \$3\]
+> return \[expr {\$1 \* \$3}\]
 
 }
 
@@ -337,11 +350,10 @@ set pgen \[yeti::yeti \#auto -name MathParser\]
 
 eval \[\$pgen dump\]
 
-set mp \[MathParser \#auto -scanner \$scanner\]
+set mp \[MathParser #auto -scanner \$scanner\]
 
 puts \"The result is \[\$mp parse\]\"
 
-KEYWORDS
-========
+# KEYWORDS
 
 parser, scanner

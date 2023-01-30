@@ -1,10 +1,8 @@
-NAME
-====
+# NAME
 
 Ylex - Yeti\'s Scanner
 
-SYNOPSIS
-========
+# SYNOPSIS
 
 **package require ylex ?0.4?**
 
@@ -28,8 +26,7 @@ SYNOPSIS
 
 *name* **configure** **-case** ?*value*?
 
-SCANNER SYNOPSIS
-================
+# SCANNER SYNOPSIS
 
 *scannerName* *objName* ?*options*?
 
@@ -51,8 +48,7 @@ SCANNER SYNOPSIS
 
 *name* **configure** **-verbout** ?*value*?
 
-DESCRIPTION
-===========
+# DESCRIPTION
 
 This manual page describes **ylex**, a scanner generator that comes with
 the **yeti** package. **ylex** is modeled after the standard **lex**
@@ -71,8 +67,7 @@ of **ylex**, see the **Scanner** section below. These scanners can be
 customized; you can use the **code** method to add user variables and
 methods to the class.
 
-COMMANDS
-========
+# COMMANDS
 
 **yeti::ylex** *name*
 
@@ -81,8 +76,7 @@ COMMANDS
     to configure the scanner generator\'s public variables, see the
     *variables* section below.
 
-METHODS
-=======
+# METHODS
 
 *name* **macro** *name* *regex* ?*\...?*
 
@@ -94,7 +88,7 @@ METHODS
 
 Defines *macros*, which are regular expressions that are stored for
 later use. Macros can be used in other macros or rules using their name
-in angular brackets, e.g. *\<digit\>* would reference the *digit* macro.
+in angular brackets, e.g. *\<digit>* would reference the *digit* macro.
 Macro names must be alphanumerical. In the first form, the **macro**
 method takes an even number of parameters. The first parameter of each
 pair is the name, the second parameter is a regular expression that may
@@ -127,14 +121,20 @@ of alternating regular expressions and scripts.
 >
 > The following options are supported:
 >
-> -   This option has the same meaning as on **regexp**. In matching
+> -nocase
+>
+> :   This option has the same meaning as on **regexp**. In matching
 >     this rule, upper-case characters in the input will be treated as
 >     lower-case.
 >
-> -   This rule will only be considered if the scanner is in the state
+> -state name
+>
+> :   This rule will only be considered if the scanner is in the state
 >     *name*. See below for more information.
 >
-> -   Same as above, but *names* is a list of state names in which the
+> -states names
+>
+> :   Same as above, but *names* is a list of state names in which the
 >     rule is active.
 
 *name* **code** *token* *script*
@@ -142,13 +142,19 @@ of alternating regular expressions and scripts.
 :   Adds custom user code to the generated scanner. *token* must be one
     of
 
-    -   Defines the class\'s constructor. The *script* may have any of
+    constructor
+
+    :   Defines the class\'s constructor. The *script* may have any of
         the formats allowed by **\[incr Tcl\]**, without the
         **constructor** keyword.
 
-    -   Defines the body of the class\'s destructor.
+    destructor
 
-    -   Defines the body of the error handler that is called whenever an
+    :   Defines the body of the class\'s destructor.
+
+    error
+
+    :   Defines the body of the error handler that is called whenever an
         error occurs, e.g. errors executing a rule\'s script. *script*
         has access to the **yyerrmsg** parameter, which contains a
         string with a description of the error and its cause. *script*
@@ -158,14 +164,22 @@ of alternating regular expressions and scripts.
         the parser then returns from the current invocation with the
         original error.
 
-    -   The *script* is added to the body of the scanner\'s *reset*
+    reset
+
+    :   The *script* is added to the body of the scanner\'s *reset*
         method.
 
-    -   
+    public
 
-    -   
+    :   
 
-    -   Defines public, protected or private class members. The *script*
+    protected
+
+    :   
+
+    private
+
+    :   Defines public, protected or private class members. The *script*
         may contain many different member definitions, like the
         respective keywords in an **\[incr Tcl\]** class definition.
 
@@ -178,8 +192,7 @@ of alternating regular expressions and scripts.
     to **eval** for instant usage, or saved to a file, from where it can
     later be sourced without involvement of the scanner generator.
 
-VARIABLES
-=========
+# VARIABLES
 
 *name* **configure** **-name** ?*value*?
 
@@ -200,8 +213,7 @@ VARIABLES
     overridden on a rule-by-rule basis using the **-nocase** option upon
     adding a rule.
 
-SCANNER USAGE
-=============
+# SCANNER USAGE
 
 Scanners are independent of **ylex**, their only dependency is on
 **\[incr Tcl\]**.
@@ -219,8 +231,7 @@ text in the input is ignored and skipped.
 Scanners are **\[incr Tcl\]** objects, so its usual rules of object
 handling (e.g. deletion of scanners) apply.
 
-SCANNER COMMANDS
-================
+# SCANNER COMMANDS
 
 *scannerName* *objName* ?*options*?
 
@@ -228,8 +239,7 @@ SCANNER COMMANDS
     can be used to configure the scanner\'s public variables, see the
     *scanner variables* section below.
 
-SCANNER METHODS
-===============
+# SCANNER METHODS
 
 *objName* **start** *string*
 
@@ -266,8 +276,7 @@ SCANNER METHODS
     called until the end of input has been reached. A list of all the
     results returned from **next** is returned.
 
-SCANNER VARIABLES
-=================
+# SCANNER VARIABLES
 
 *objName* **configure** **-case** ?*value*?
 
@@ -304,8 +313,7 @@ SCANNER VARIABLES
 :   This variable contains the channel that is used for debug output. By
     default, this is **stderr**.
 
-SCRIPTS
-=======
+# SCRIPTS
 
 Scripts are executed in the context of the scanner. Scripts have access
 to the following variables.
@@ -328,7 +336,7 @@ to the following variables.
 
 :   The absolute index of the last character of the current match.
 
-*\<i\>*
+*\<i>*
 
 :   These variables (**\$1**, **\$2** \...) contain any subexpressions
     matched by the regular expression.
@@ -338,8 +346,7 @@ use or access variables with this prefix other than those documented
 here. Also, a scanner\'s public methods and variables as seen above must
 be respected.
 
-STATES
-======
+# STATES
 
 Initially, a scanner is in the initial state as determined by the
 **start** variable of the scanner generator. Scripts can switch to a
@@ -349,20 +356,18 @@ considered, as determined by the **-state** or **-states** options upon
 adding rules to the scanner generator; if no such option was used when
 adding a rule, it will be active in all states.
 
-NOTES
-=====
+# NOTES
 
 Unmatched text in the input is ignored. In order to throw an error upon
 unmatched text, add a \"catch-all\" rule at the end of the rule set
 (usually with the regular expression \".\" that matches any character).
 
-Subexpressions are available in the *\$\<i\>* variables only when using
+Subexpressions are available in the *\$\<i>* variables only when using
 Tcl 8.3 or above.
 
 It is illegal to have rules that match the empty string.
 
-TODO
-====
+# TODO
 
 There should be a means of reading data from elsewhere than a string. It
 might be inconvenient to have all the input in memory. However, that is
@@ -370,7 +375,6 @@ not possible with the current regexp engine.
 
 Maybe there should be the possibility to read a lex-like input file.
 
-KEYWORDS
-========
+# KEYWORDS
 
 scanner, parser, token
