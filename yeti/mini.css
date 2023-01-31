@@ -123,3 +123,4 @@
         padding: 3px;
         text-align: center;
     }
+    p, ul,dl { padding-left: 30px; }
