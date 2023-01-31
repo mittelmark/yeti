@@ -1,123 +1,1 @@
-
-PACKAGE: Tcl++ (for Tcl 8.0)
-AUTHOR:	Matt Newman <matt@sensus.org>
-	Sensus Consulting Ltd (c) 1997-1998
-
-DESCRIPTION:
-
-	Tcl++ is an almost 100% [incr Tk] compatible, tcl-only
-implementation. (See COMPATIBILITY)
-
-RESTRICTIONS ON USAGE:
-	None - subject to copyright being acknowledged on all derivative
-	work. But please note that this is a derivative work, based upon
-	the original ideas and software from the people listed at the
-	end of this README.
-
-PLATFORMS:
-	Any - though it has only been tested on Win95 & WinNT.
-
-INSTALLATION:
-	The tk++, widgets++ & tcl++ directories need to live as
-	subdirectories of your main tcl directory, e.g. C:\Program
-	Files\Tcl\lib on Windows 95/NT 4.0 machines.
-
-USAGE: package require tcl++
-
-BACKGROUND
-	I have been a committed [incr Tcl] user for as long as it has
-	been available, but due to work pressures needed a functional
-	[incr Tcl] under Tcl 8.0. I started out implementing a very
-	simple framework, as I didn't want the complexity of switching
-	to one of the other OO packages that are available for Tcl. As
-	I "improved" it I began to belive that it might be possible to
-	implement a near-100% compatibile Tcl-only [incr Tcl], so that is
-	what I have done.
-
-	Please note, this is not intended to complete with [incr Tcl], but
-	on the other hand to serve as a tool for early adopters of new Tcl
-	releases, as it is far less suseptable to the incompatibilities
-	that new Tcl release bring, and therefore the associated delays
-	in Michael's busy schedule, as he tries to play catch-up.
-
-COMPATIBILITY
-
-	It is eariest to detail how it differs from [incr Tcl], then to
-	detail how it conforms, so here is the the master list:
-
-	1)	It is SLOWER -
-		Invoking a method from outside the class incurs a 1.5ms
-		overhead. Though please consult the tcl++.tcl file fore
-		more details, as the functions tcl++::compileAccessor &
-		compileMethod could be converted into C without having
-		to change the reast of the implementation, which could
-		very simplily yield 100% compatibility.
-
-		Invoking a method from INSIDE a class context incurs
-		upwards of 350us overhead, more if you use protected or
-		private arrays (see below).
-
-	2)	public variables
-
-		these are accessable as $v(-varName) in method contexts,
-		instead of plain $varName in [incr Tcl]
-
-	3)	protected variables
-
-		these are accessable as $v(varName) in method contexts,
-		instead of plain $varName in [incr Tcl]
-
-	4)	private variables
-
-		these are accessable as $_(varName) in method contexts,
-		instead of plain $varName in [incr Tcl]
-
-	5)	 Uninitialized variables (protected or private)
-
-		These add to the method invocation overhead, at around
-		50us for each variable, but have the advantage that they
-		appear with their native names, just like [incr Tcl].
-
-	6)	The standard info command has NOT been overloaded with the
-		[incr Tcl] additions, but you can use info++ instead to
-		provide some backwards compatibility.
-
-	7)	*ALL* objects inherit (wether you specify inherit or
-		not) from the base class called ::tcl++::Object.
-
-	8)	lack of the "import" command (Tcl 8.0 namespaces are
-		sufficiently different to make it impractical to implement
-		this - though god knows I tried!),
-
-	Apart from these issues, you should find it compatibable with
-	any existing [incr Tcl] code - though please let me know if you
-	uncover any other incompatibilities.
-
-ADDITIONAL CODE:
-	Also in the tcl++ directory is a Tree base class, some convenience
-	routines for manipulating "paired" lists (see lists.tcl) and
-	also some TclX compatibility routines if you do not have TclX
-	installed.
-
-Please enjoy, and give me feedback on bugs, improvements etc. My intent
-is to try and stimulate a more bazaar-style development, and as such I
-will release as often as there is progress, and your are all invited to
-join in!
-
-Matt Newman <matt@sensus.org>
-Sensus Consulting Ltd
-4th Feb 1998
-
-
-tcl++ & tk++ are derived from the ideas embodied in [incr Tcl] & [incr Tk]
-#
-#   AUTHOR:  Michael J. McLennan
-#            Bell Labs Innovations for Lucent Technologies
-#            mmclennan@lucent.com
-#            http://www.tcltk.com/itcl
-#
-#      RCS:  $Id: README.txt,v 1.1.1.1 1998/06/07 22:30:00 matt Exp $
-# ----------------------------------------------------------------------
-#               Copyright (c) 1993-1996  Lucent Technologies
-# ======================================================================
-# [see tk++/Archetype.tcl for the full Lucent disclaimer]
+PACKAGE: Tcl++ (for Tcl 8.0)AUTHOR:	Matt Newman <matt@sensus.org>	Sensus Consulting Ltd (c) 1997-1998DESCRIPTION:	Tcl++ is an almost 100% [incr Tk] compatible, tcl-only        implementation. (See COMPATIBILITY)RESTRICTIONS ON USAGE:	None - subject to copyright being acknowledged on all derivative	work. But please note that this is a derivative work, based upon	the original ideas and software from the people listed at the	end of this README.PLATFORMS:	Any - though it has only been tested on Win95 & WinNT.INSTALLATION:	The tk++, widgets++ & tcl++ directories need to live as	subdirectories of your main tcl directory, e.g. C:\Program	Files\Tcl\lib on Windows 95/NT 4.0 machines.USAGE: package require tcl++BACKGROUND	I have been a committed [incr Tcl] user for as long as it has	been available, but due to work pressures needed a functional	[incr Tcl] under Tcl 8.0. I started out implementing a very	simple framework, as I didn't want the complexity of switching	to one of the other OO packages that are available for Tcl. As	I "improved" it I began to belive that it might be possible to	implement a near-100% compatibile Tcl-only [incr Tcl], so that is	what I have done.	Please note, this is not intended to complete with [incr Tcl], but	on the other hand to serve as a tool for early adopters of new Tcl	releases, as it is far less suseptable to the incompatibilities	that new Tcl release bring, and therefore the associated delays	in Michael's busy schedule, as he tries to play catch-up.COMPATIBILITY	It is eariest to detail how it differs from [incr Tcl], then to	detail how it conforms, so here is the the master list:	1)	It is SLOWER -		Invoking a method from outside the class incurs a 1.5ms		overhead. Though please consult the tcl++.tcl file fore		more details, as the functions tcl++::compileAccessor &		compileMethod could be converted into C without having		to change the reast of the implementation, which could		very simplily yield 100% compatibility.		Invoking a method from INSIDE a class context incurs		upwards of 350us overhead, more if you use protected or		private arrays (see below).	2)	public variables		these are accessable as $v(-varName) in method contexts,		instead of plain $varName in [incr Tcl]	3)	protected variables		these are accessable as $v(varName) in method contexts,		instead of plain $varName in [incr Tcl]	4)	private variables		these are accessable as $_(varName) in method contexts,		instead of plain $varName in [incr Tcl]	5)	Uninitialized variables (protected or private)		These add to the method invocation overhead, at around		50us for each variable, but have the advantage that they		appear with their native names, just like [incr Tcl].	6)	The standard info command has NOT been overloaded with the		[incr Tcl] additions, but you can use info++ instead to		provide some backwards compatibility.	7)	*ALL* objects inherit (wether you specify inherit or		not) from the base class called ::tcl++::Object.	8)	lack of the "import" command (Tcl 8.0 namespaces are		sufficiently different to make it impractical to implement		this - though god knows I tried!),	Apart from these issues, you should find it compatibable with	any existing [incr Tcl] code - though please let me know if you	uncover any other incompatibilities.ADDITIONAL CODE:	Also in the tcl++ directory is a Tree base class, some convenience	routines for manipulating "paired" lists (see lists.tcl) and	also some TclX compatibility routines if you do not have TclX	installed.  Please enjoy, and give me feedback on bugs, improvements etc. My intent  is to try and stimulate a more bazaar-style development, and as such I  will release as often as there is progress, and your are all invited to  join in!  Matt Newman <matt@sensus.org>  Sensus Consulting Ltd  4th Feb 1998  tcl++ & tk++ are derived from the ideas embodied in [incr Tcl] & [incr Tk]  #  #   AUTHOR:  Michael J. McLennan  #  #            Bell Labs Innovations for Lucent Technologies  #  #            mmclennan@lucent.com  #  #            http://www.tcltk.com/itcl  #  #  #  #      RCS:  $Id: README.txt,v 1.1.1.1 1998/06/07 22:30:00 matt Exp $  #  # ----------------------------------------------------------------------  #  #               Copyright (c) 1993-1996  Lucent Technologies  #  # ======================================================================  #  # [see tk++/Archetype.tcl for the full Lucent disclaimer]
