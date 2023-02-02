@@ -63,3 +63,8 @@ The scanner should then run even when Itcl is not not available.
 * [sample.pgn - sample games for PgnReader demo](https://github.com/mittelmark/yeti/blob/main/demo/sample.pgn)
 * [cscanner demo](https://github.com/mittelmark/yeti/blob/main/demo/cscanner.tcl)
 * [cparser demo](https://github.com/mittelmark/yeti/blob/main/demo/cparser.tcl)
+
+## Links
+
+* [tcl-json](https://github.com/bef/tcl-json) - ylex/yeti based json parser with type support
+* [yeti-wikipage](https://wiki.tcl-lang.org/page/Yeti)
