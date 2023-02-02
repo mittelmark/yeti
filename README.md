@@ -56,6 +56,7 @@ The scanner should then run even when Itcl is not not available.
 
 ## Demos
 
+* [wc implementation using ylex](https://github.com/mittelmark/yeti/blob/main/demo/scan-wc.tcl)
 * [PgnReader demo](https://github.com/mittelmark/yeti/blob/main/demo/PgnReader.tcl)
 * [PgnReader output](https://github.com/mittelmark/yeti/blob/main/demo/PgnReader-0.1.tm)
 * [PgnReader HTML manual](https://htmlpreview.github.io/?https://github.com/mittelmark/yeti/blob/master/demo/PgnReader.html)
